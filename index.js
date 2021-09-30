@@ -5,6 +5,7 @@ var express = require('express');
 // Construct a schema, using GraphQL schema language
 var restaurants = [
   {
+    "id": 1,
     "name": "WoodsHill",
     "description": "American cuisine, farm to table, with fresh produce every day",
     "dishes": [
@@ -19,6 +20,7 @@ var restaurants = [
     ]
   },
   {
+    "id": 2,
     "name": "Fiorellas",
     "description": "Italian-American home cooked food with fresh pasta and sauces",
     "dishes": [
@@ -37,6 +39,7 @@ var restaurants = [
     ]
   },
   {
+    "id": 3,
     "name": "Karma",
     "description": "Malaysian-Chinese-Japanese fusion, with great bar and bartenders",
     "dishes": [
@@ -58,11 +61,12 @@ var restaurants = [
 var schema = buildSchema(`
 
 type Query {
-  restaurant(name: String): Restaurant
+  restaurant(id: Int): Restaurant
   restaurants: [Restaurant]
 },
 
 type Restaurant {
+  id: Int
   name: String
   description: String
   dishes: [Dish]
@@ -83,25 +87,29 @@ type Response {
 }
 
 type Mutation {
-  createRestaurant(input: RestaurantInput): Response
-  updateRestaurant(name: String, input: RestaurantInput): Response
-  deleteRestaurant(name: String): Response
+  setRestaurant(input: RestaurantInput): Response
+  editRestaurant(id: Int, input: RestaurantInput): Response
+  DeleteRestaurant(id: Int): Response
 }
 `);
 // The root provides a resolver function for each API endpoint
 
 
 var root = {
-  restaurant : (name) => {
-    return restaurants.filter( (item) => {
-      item.name === name;
-    })
+  restaurant : ({id}) => {
+
+    const result = restaurants.filter( item => item.id === id)[0];
+    console.log(result);
+    return {...result};
   },
   restaurants : ()=> restaurants,
-  createRestaurant : ({input}) => {
+  setRestaurant : ({input}) => {
 
     const prevLength = restaurants.length;
+    const date = new Date();
+  
     restaurants.push({
+      id: Math.floor(Math.random()*1000000),
       name: input.name,
       description :input.description,
       dishes: input.dishes
@@ -109,10 +117,10 @@ var root = {
     const ok = Boolean(restaurants[prevLength]);
     return {ok};
   },
-  updateRestaurant: ({name, input}) => {
+  editRestaurant: ({id, input}) => {
 
     const newRestaurants = restaurants.map( (item) => {
-      if(item.name === name){
+      if(item.id === id){
         return {...item, ...input};
       } else return item;
     });
@@ -123,10 +131,10 @@ var root = {
     ).length === 1);
     return {ok};
   },
-  deleteRestaurant : ({name})=>{
+  DeleteRestaurant : ({id})=>{
 
-    restaurants = restaurants.filter(item => item.name !== name)
-    const ok = Boolean(restaurants.filter(item => item.name === name).length === 0);
+    restaurants = restaurants.filter(item => item.id !== id)
+    const ok = Boolean(restaurants.filter(item => item.id === id).length === 0);
     return {ok};
   }  
 }
