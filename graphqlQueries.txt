@@ -1,0 +1,26 @@
+{
+  contacts {
+    id
+    name
+    email
+    age
+  }
+}
+
+mutation {
+  setContact(input: {
+    name: "max"
+    email: "m@x.com"
+    age: 34
+  }) {
+    name
+    email
+    age
+  }
+}
+
+mutation {
+  deleteContact(id: 4) {
+    ok
+  }
+}
